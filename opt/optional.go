@@ -42,6 +42,12 @@ func (o Opt[T]) Unwrap() (T, bool) {
 	return o.val, o.some
 }
 
+// Present tells whether the optional has a value without unpacking
+// it.
+func (o* Opt[T]) Present() bool {
+	return o.some
+}
+
 // String implements the [fmt.Stringer] interface, it returns the
 // string "<none>" if the Opt is None, otherwise it returns the
 // string representation of the underlying value, using [fmt.Sprint].
