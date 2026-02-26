@@ -6,4 +6,4 @@ pkg is a small collection of useful Go packages made by myself.
 
 ### `opt`
 
-`opt` implements a optional type, it may or may not contain a value. It can also be marshalled and unmarshalled with json, using the undelying marshelers, if such exist.
+`opt` implements a optional type, it may or may not contain a value. It can also be marshalled and unmarshalled with JSON, using the underlying marshelers, if such exist.
