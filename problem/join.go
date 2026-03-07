@@ -8,8 +8,8 @@ import (
 // Multi is an error that represents multiple errors.
 type Multi struct{ errs []error }
 
-// Join combines multiple errors into a single error. Nil errors are
-// ignored. If all errors are nil, Join returns nil.
+// Join combines multiple errors into a single error. Nil errors are ignored.
+// If all errors are nil, Join returns nil.
 func Join(errs ...error) error {
 	var n int
 	for _, err := range errs {
@@ -56,8 +56,7 @@ func (e Multi) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.errs)
 }
 
-// UnmarshalJSON implements the [json.Unmarshaler] interface on the
-// type.
+// UnmarshalJSON implements the [json.Unmarshaler] interface on the type.
 func (e *Multi) UnmarshalJSON(buf []byte) error {
 	var errs []error
 	if err := json.Unmarshal(buf, &errs); err != nil {

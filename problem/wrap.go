@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-// Wrap wraps an error into a type that implements JSON marshalling
-// and unmarshalling.
+// Wrap wraps an error into a type that implements JSON marshalling and
+// unmarshalling.
 func Wrap(err error) error {
 	return &wrapped{err}
 }
@@ -16,8 +16,8 @@ type wrapped struct{ error }
 
 var errUnmarshal = errors.New("errors: failed to unmarsheled error into a sensible type")
 
-// Wrap wraps an error into a type that implements JSON marshalling
-// and unmarshalling.
+// Wrap wraps an error into a type that implements JSON marshalling and
+// unmarshalling.
 func (e *wrapped) Error() string {
 	return e.error.Error()
 }
@@ -53,10 +53,9 @@ func (e wrapped) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.Error())
 }
 
-// UnmarshalJSON implements the [json.Unmarshaler] interface on the
-// type. It tries to unmarshal the error into an [Error], if that
-// fails, it tries to unmarshal it into a string, if that also fails,
-// it returns an error.
+// UnmarshalJSON implements the [json.Unmarshaler] interface on the type. It
+// tries to unmarshal the error into an [Error], if that fails, it tries to
+// unmarshal it into a string, if that also fails, it returns an error.
 func (e *wrapped) UnmarshalJSON(buf []byte) error {
 	var err_ Error
 	if err := json.Unmarshal(buf, &err_); err == nil {

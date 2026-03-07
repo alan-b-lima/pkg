@@ -7,59 +7,59 @@ import (
 
 // Kind in a enumeration of kinds of errors.
 //
-// All [Kind]s of errors here listed follow a HTTP status counterpart
-// in the 4xx or 5xx range, the contrary is not true. [Kind]s do not
-// necessarely keep the same phrase as the HTTP status counterparts.
+// All [Kind]s of errors here listed follow a HTTP status counterpart in the
+// 4xx or 5xx range, the contrary is not true. [Kind]s do not necessarely keep
+// the same phrase as the HTTP status counterparts.
 //
-// [Kind]s of errors in the 4xx range are here called "External" and in
-// the 5xx "Internal". [Kind.IsExternal] and [Kind.IsInternal] can be
-// used to inspect its category.
+// [Kind]s of errors in the 4xx range are here called "External" and in the 5xx
+// "Internal". [Kind.IsExternal] and [Kind.IsInternal] can be used to inspect
+// its category.
 //
 // [Kind]s can also be directly used as HTTP statuses.
 type Kind int
 
 // Enumeration of external errors, i.e., client errors.
 const (
-	// Bad Request
+	// 400 Bad Request
 	Malformed Kind = 400
 
-	// Unauthorized
+	// 401 Unauthorized
 	Unauthenticated Kind = 401
 
-	// Payment Required
+	// 402 Payment Required
 	PaymentRequired Kind = 402
 
-	// Forbidden
+	// 403 Forbidden
 	Unauthorized Kind = 403
 
-	// Not Found
+	// 404 Not Found
 	NotFound Kind = 404
 
 	// 405 Method Not Allowed
 
-	// Not Acceptable
+	// 406 Not Acceptable
 	UnsupportedAcceptable Kind = 406
 
 	// 407 Proxy Authentication Required
 
-	// Request Timeout
+	// 408 Request Timeout
 	Timeout Kind = 408
 
-	// Conflict
+	// 409 Conflict
 	Conflict Kind = 409
 
 	// 410 Gone
 	// 411 Length Required
 
-	// Precondition Failed
+	// 412 Precondition Failed
 	PreconditionFailed Kind = 412
 
-	// Content Too Large
+	// 413 Content Too Large
 	TooLarge Kind = 413
 
 	// 414 URI Too Long
 
-	// Unsupported Media Type
+	// 415 Unsupported Media Type
 	UnsupportedContentType Kind = 415
 
 	// 416 Range Not Satisfiable
@@ -67,7 +67,7 @@ const (
 	// "418 I'm a teapot"
 	// 421 Misdirected Request
 
-	// Unprocessable Content
+	// 422 Unprocessable Content
 	SemanticalError Kind = 422
 
 	// 423 Locked
@@ -75,10 +75,10 @@ const (
 	// 425 Too Early
 	// 426 Upgrade Required
 
-	// Precondition Required
+	// 428 Precondition Required
 	LostUpdate Kind = 428
 
-	// Too Many Requests
+	// 429 Too Many Requests
 	TooManyRequests Kind = 429
 
 	// 431 Request Header Fields Too Large
@@ -87,25 +87,25 @@ const (
 
 // Enumeration of external errors, i.e., server errors.
 const (
-	// Internal Server Error
+	// 500 Internal Server Error
 	UnexpectedError Kind = 500
 
-	// Not Implemented
+	// 501 Not Implemented
 	Unimplemented Kind = 501
 
-	// Bad Gateway
+	// 502 Bad Gateway
 	BadGateway Kind = 502
 
-	// Service Unavailable
+	// 503 Service Unavailable
 	Unavailable Kind = 503
 
-	// Gateway Timeout
+	// 504 Gateway Timeout
 	GatewayTimeout Kind = 504
 
 	// 505 HTTP Version Not Supported
 	// 506 Variant Also Negotiates
 
-	// Insufficient Storage
+	// 507 Insufficient Storage
 	InsufficientStorage Kind = 507
 
 	// 508 Loop Detected
@@ -113,15 +113,14 @@ const (
 	// 511 Network Authentication Required
 )
 
-// IsExternal identifies whether the kind falls under the external
-// category, i.e., caused by a client.
+// IsExternal identifies whether the kind falls under the external category,
+// i.e., caused by a client.
 func (k Kind) IsExternal() bool {
 	return 400 <= k && k <= 499
 }
 
-// IsExternal identifies whether the kind falls under the external
-// category, i.e., not caused by the client, and usually outside of
-// its control.
+// IsExternal identifies whether the kind falls under the external category,
+// i.e., not caused by the client, and usually outside of its control.
 func (k Kind) IsInternal() bool {
 	return 500 <= k && k <= 599
 }
@@ -141,9 +140,14 @@ var kindStrings = map[Kind]string{
 	SemanticalError:        "semantical error",
 	LostUpdate:             "lost update",
 	TooManyRequests:        "too many requests",
-}
 
-var stringKinds = invert(kindStrings)
+	UnexpectedError:     "unexpected error",
+	Unimplemented:       "unimplemented",
+	BadGateway:          "badG gateway",
+	Unavailable:         "unavailable",
+	GatewayTimeout:      "gateway timeout",
+	InsufficientStorage: "insufficient storage",
+}
 
 // String implements the [fmt.Stringer] interface on the type.
 func (k Kind) String() string {
@@ -155,6 +159,8 @@ func (k Kind) MarshalJSON() ([]byte, error) {
 	quoted := strconv.Quote(kindStrings[k])
 	return []byte(quoted), nil
 }
+
+var stringKinds = invert(kindStrings)
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface on the type.
 func (k *Kind) UnmarshalJSON(buf []byte) error {
