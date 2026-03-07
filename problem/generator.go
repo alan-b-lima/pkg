@@ -12,7 +12,7 @@ type imp struct {
 
 // Imp is an error implementation that can be incrementally constructed, up
 // until final construction, through [imp.Make], all [imp]s are passed around
-// as values, therefore, an assignment will only affect those after it.
+// as values, therefore, all previous [imp]s are oblivious to future changes.
 func Imp(kind Kind, title string) imp {
 	return imp{
 		kind:  kind,
@@ -43,8 +43,8 @@ func (b imp) Cause(cause error) imp {
 	return b
 }
 
-// Metadata replaces the error metadata of the implementation.
-func (b imp) Metadata(details map[string]any) imp {
+// Details replaces the error details of the implementation.
+func (b imp) Details(details map[string]any) imp {
 	b.details = details
 	return b
 }
@@ -69,9 +69,9 @@ func (gen fmt_) Cause(cause error) fmt_ {
 	return gen
 }
 
-// Metadata replaces the error metadata of the implementation.
-func (gen fmt_) Metadata(metadata map[string]any) fmt_ {
-	gen.details = metadata
+// Details replaces the error details of the implementation.
+func (gen fmt_) Details(details map[string]any) fmt_ {
+	gen.details = details
 	return gen
 }
 
