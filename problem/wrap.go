@@ -6,14 +6,6 @@ import (
 	"fmt"
 )
 
-// AsType is a generic function that replaces the common boilerplate
-// for using the [errors.As] function.
-func AsType[T error](err error) (T, bool) {
-	var target T
-	ok := errors.As(err, &target)
-	return target, ok
-}
-
 // Wrap wraps an error into a type that implements JSON marshalling
 // and unmarshalling.
 func Wrap(err error) error {
