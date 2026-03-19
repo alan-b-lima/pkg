@@ -4,6 +4,10 @@ pkg is a small collection of useful Go packages made by myself.
 
 ## Packages
 
+- [`heap`](./heap/) implements the minheap abstract data structure using the functions and interface given by the [container/heap] package.
+
 - [`opt`](./opt/) implements a optional type, it may or may not contain a value. It can also be marshalled and unmarshalled with JSON, using the underlying marshelers, if such exist.
 
 - [`problem`](./problem/) implements especialized functionalities on the domain of Go's error handling.
+
+- [`timeout`](./timeout/) implements a system for running actions after an specified time.
