@@ -51,6 +51,11 @@ func (e *Multi) Error() string {
 	return b.String()
 }
 
+// Unwrap implements the interface for unwrapping errors.
+func (e *Multi) Unwrap() []error {
+	return e.errs
+}
+
 // MarshalJSON implements the [json.Marshaler] interface on the type.
 func (e Multi) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.errs)
