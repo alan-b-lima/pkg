@@ -106,7 +106,7 @@ var errAllShadowed = errors.New("problem: all shadowed: nothing to display")
 //
 // For the [*Multi] type, they are marshalled as a JSON array of [Shadow]ed
 // errors.
-func (e *shadowed) MarshalJSON() ([]byte, error) {
+func (e shadowed) MarshalJSON() ([]byte, error) {
 	switch err := e.error.(type) {
 	case *Error:
 		alt := Error{
@@ -119,7 +119,7 @@ func (e *shadowed) MarshalJSON() ([]byte, error) {
 			return alt.MarshalJSON()
 		}
 
-		alt.Cause = Shadow(alt.Cause)
+		alt.Cause = Shadow(err.Cause)
 		alt.Details = err.Details
 		return alt.MarshalJSON()
 
