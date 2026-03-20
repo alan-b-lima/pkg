@@ -50,8 +50,8 @@ func (err *Error) IsExternal() bool {
 	return err.Kind.IsExternal()
 }
 
-// IsCLient identifies whether the error falls under the internal category, see
-// [Kind].
+// IsInternal identifies whether the error falls under the internal category,
+// see [Kind].
 func (err *Error) IsInternal() bool {
 	return err.Kind.IsInternal()
 }
