@@ -27,7 +27,7 @@ type Lesser[T any] interface {
 
 // Make preallocates memory for a heap of type T with the
 // given size. If no size is given, it defaults to 0.
-// 
+//
 // Make panics if the size is negative, or if more than one
 // argument is given.
 func Make[T Lesser[T]](size ...int) Heap[T] {
@@ -94,6 +94,14 @@ func (h *Heap[T]) Peek() T {
 	}
 
 	return h._heap.ess[0]
+}
+
+// Clear removes all elements from the heap.
+//
+// The complexity is O(n) where n = h.Len().
+func (h *Heap[T]) Clear() {
+	clear(h._heap.ess)
+	h._heap.ess = h._heap.ess[:0]
 }
 
 // String implements the [fmt.Stringer] interface, it
