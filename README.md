@@ -10,4 +10,4 @@ pkg is a small collection of useful Go packages made by myself.
 
 - [`problem`](./problem/) implements especialized functionalities on the domain of Go's error handling.
 
-- [`timeout`](./timeout/) implements a system for running actions after an specified time.
+- [`scheduler`](./scheduler/) implements a system for running actions after an specified deadline.
