@@ -1,3 +1,5 @@
+// Package query provides a function to parse search query parameters from
+// [url.Values] into a struct.
 package query
 
 import (
