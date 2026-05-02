@@ -10,26 +10,54 @@ import (
 )
 
 var (
+	ErrPanic              = errors.New("query: panic while parsing")
 	ErrNotPointerToStruct = errors.New("query: v must be a pointer to struct type")
-	ErrNilPointer         = errors.New("query: v is a nil pointer to struct")
 
-	ErrPanic         = errors.New("query: panic while parsing")
 	ErrUnsettable    = errors.New("query: cannot change contents of v")
 	ErrUnaddressable = errors.New("query: field is not addressable")
 
 	ErrUnsupportedType = errors.New("query: unsupported type")
-	ErrConvertion      = errors.New("query: convertion error")
 )
 
-func Parse(q url.Values, v any) (err error) {
+// Unmarshal parses the search query parameters from url.Values into the struct
+// into the value pointed to by v. If v is nil or not a pointer, Unmarshal
+// returns an [ErrNotPointerToStruct].
+//
+// The struct fields must be exported and tagged with `query:"name"` to be
+// parsed, name is the key in url.Values.
+//
+// Unmarshal supports the following types:
+//
+//	string
+//	int, int8, int16, int32, int64
+//	uint, uint8, uint16, uint32, uint64, uintptr
+//	float32, float64
+//	complex64, complex128
+//	bool
+//	slices of the above types
+//	time.Time (in RFC3339Nano format)
+//
+// If a unsupported type is given, [ErrUnsupportedType] us reported. If any
+// convertion fails, a [ConvertionError] is reported.
+//
+// If a name appears multiple times in the query params, like
+// “?name=1&name=2”, for all types but slices only the first will be
+// considered. For slices, each element is parsed as its underlying type an put
+// in the same order they appear in the query.
+//
+// Bytes slices are NOT treated as special.
+func Unmarshal(q url.Values, v any) (err error) {
 	defer func() {
-		if recover() != nil {
+		if panic := recover(); panic != nil {
 			err = ErrPanic
+			if e, ok := panic.(error); ok {
+				err = fmt.Errorf("%w: %w", ErrPanic, e)
+			}
 		}
 	}()
 
 	if v == nil {
-		return ErrNilPointer
+		return ErrNotPointerToStruct
 	}
 
 	rvalue := reflect.ValueOf(v)
@@ -88,46 +116,52 @@ func query_var(val []string, v any) error {
 	switch rtype.Kind() {
 	case reflect.String:
 		rvalue.SetString(val[0])
+		return nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		num, err := strconv.ParseInt(val[0], 10, rtype.Bits())
 		if err != nil {
-			return conerr(rtype, err)
+			return converr(rtype, err)
 		}
 
 		rvalue.SetInt(int64(num))
+		return nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		num, err := strconv.ParseUint(val[0], 10, rtype.Bits())
 		if err != nil {
-			return conerr(rtype, err)
+			return converr(rtype, err)
 		}
 
 		rvalue.SetUint(uint64(num))
+		return nil
 
 	case reflect.Float32, reflect.Float64:
 		num, err := strconv.ParseFloat(val[0], rtype.Bits())
 		if err != nil {
-			return conerr(rtype, err)
+			return converr(rtype, err)
 		}
 
 		rvalue.SetFloat(num)
+		return nil
 
 	case reflect.Complex64, reflect.Complex128:
 		num, err := strconv.ParseComplex(val[0], rtype.Bits())
 		if err != nil {
-			return conerr(rtype, err)
+			return converr(rtype, err)
 		}
 
 		rvalue.SetComplex(num)
+		return nil
 
 	case reflect.Bool:
 		b, err := strconv.ParseBool(val[0])
 		if err != nil {
-			return conerr(rtype, err)
+			return converr(rtype, err)
 		}
 
 		rvalue.SetBool(b)
+		return nil
 
 	case reflect.Slice:
 		if rtype.Elem().Kind() == reflect.String {
@@ -154,38 +188,39 @@ func query_var(val []string, v any) error {
 			}
 		}
 
+		return nil
+
 	case reflect.Struct:
-		if !(rtype.PkgPath() == "time" && rtype.Name() == "Time") {
-			return ErrUnsupportedType
+		if rtype.PkgPath() == "time" && rtype.Name() == "Time" {
+			t, err := time.Parse(time.RFC3339Nano, val[0])
+			if err != nil {
+				return converr(rtype, err)
+			}
+
+			rvalue.Set(reflect.ValueOf(t))
+			return nil
 		}
-
-		t, err := time.Parse(time.RFC3339Nano, val[0])
-		if err != nil {
-			return conerr(rtype, err)
-		}
-
-		rvalue.Set(reflect.ValueOf(t))
-
-	default:
-		return ErrUnsupportedType
 	}
 
-	return nil
+	return ErrUnsupportedType
 }
 
+// ConvertionError is an error that occurs when a value cannot be converted to
+// the target type. It contains the target type and the underlying error that
+// caused the failure.
 type ConvertionError struct {
 	Type reflect.Type
 	Err  error
+}
+
+func converr(t reflect.Type, err error) error {
+	return &ConvertionError{Type: t, Err: err}
 }
 
 func (e *ConvertionError) Error() string {
 	return fmt.Sprintf("query: not convertible to %v: %v", e.Type, e.Err)
 }
 
-func (e *ConvertionError) Unwrap() []error {
-	return []error{ErrConvertion, e.Err}
-}
-
-func conerr(t reflect.Type, err error) error {
-	return &ConvertionError{Type: t, Err: err}
+func (e *ConvertionError) Unwrap() error {
+	return e.Err
 }
