@@ -10,4 +10,6 @@ pkg is a small collection of useful Go packages made by myself.
 
 - [`problem`](./problem/) implements especialized functionalities on the domain of Go's error handling.
 
+- [`query`](./query/) provides a function to parse search query parameters from `url.Values` into a struct.
+
 - [`scheduler`](./scheduler/) implements a system for running actions after an specified deadline.
