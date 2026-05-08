@@ -52,7 +52,7 @@ const (
 	// 411 Length Required
 
 	// 412 Precondition Failed
-	PreconditionFailed Kind = 412
+	LostUpdate Kind = 412
 
 	// 413 Content Too Large
 	TooLarge Kind = 413
@@ -76,7 +76,7 @@ const (
 	// 426 Upgrade Required
 
 	// 428 Precondition Required
-	LostUpdate Kind = 428
+	MissingPrecondition Kind = 428
 
 	// 429 Too Many Requests
 	TooManyRequests Kind = 429
@@ -134,11 +134,11 @@ var kindStrings = map[Kind]string{
 	UnsupportedAcceptable:  "unsupported acceptable",
 	Timeout:                "timeout",
 	Conflict:               "conflict",
-	PreconditionFailed:     "precondition failed",
+	LostUpdate:             "lost update",
 	TooLarge:               "too large",
 	UnsupportedContentType: "unsupported content type",
 	SemanticalError:        "semantical error",
-	LostUpdate:             "lost update",
+	MissingPrecondition:    "missing precondition",
 	TooManyRequests:        "too many requests",
 
 	UnexpectedError:     "unexpected error",
