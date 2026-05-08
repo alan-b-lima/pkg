@@ -119,8 +119,8 @@ func (k Kind) IsExternal() bool {
 	return 400 <= k && k <= 499
 }
 
-// IsExternal identifies whether the kind falls under the external category,
-// i.e., not caused by the client, and usually outside of its control.
+// IsInternal identifies whether the kind falls under the internal category,
+// i.e., not caused by the client, and usually outside of their control.
 func (k Kind) IsInternal() bool {
 	return 500 <= k && k <= 599
 }
