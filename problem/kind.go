@@ -85,7 +85,7 @@ const (
 	// 451 Unavailable For Legal Reasons
 )
 
-// Enumeration of external errors, i.e., server errors.
+// Enumeration of internal errors, i.e., server errors.
 const (
 	// 500 Internal Server Error
 	UnexpectedError Kind = 500
@@ -143,7 +143,7 @@ var kindStrings = map[Kind]string{
 
 	UnexpectedError:     "unexpected error",
 	Unimplemented:       "unimplemented",
-	BadGateway:          "badG gateway",
+	BadGateway:          "bad gateway",
 	Unavailable:         "unavailable",
 	GatewayTimeout:      "gateway timeout",
 	InsufficientStorage: "insufficient storage",
