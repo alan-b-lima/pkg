@@ -39,6 +39,19 @@ func (err *Error) Error() string {
 	return err.Message
 }
 
+// Is reports whether the given error is of the other type.
+//
+// Two errors are considered the same, i.e, they are each other, if they have
+// the same title.
+//
+// Callers should prefer [errors.Is], as it also handles deep comparisons.
+func (err *Error) Is(other error) bool {
+	if other, ok := other.(*Error); ok {
+		return err.Title == other.Title
+	}
+	return false
+}
+
 // Unwrap returns the cause of the error, the cause might be nil.
 func (err *Error) Unwrap() error {
 	return err.Cause
