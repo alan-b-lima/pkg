@@ -58,16 +58,31 @@ func (e *Multi) Unwrap() []error {
 
 // MarshalJSON implements the [json.Marshaler] interface on the type.
 func (e Multi) MarshalJSON() ([]byte, error) {
+	wrps := make([]wrapped, 0, len(e.errs))
+	for _, err := range e.errs {
+		wrps = append(wrps, wrapped{err})
+	}
+
 	return json.Marshal(e.errs)
 }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface on the type.
 func (e *Multi) UnmarshalJSON(buf []byte) error {
-	var errs []error
-	if err := json.Unmarshal(buf, &errs); err != nil {
+	var wrps []wrapped
+	if err := json.Unmarshal(buf, &wrps); err != nil {
 		return err
 	}
 
-	e.errs = errs
+	errs := make([]error, 0, len(wrps))
+	for _, err := range wrps {
+		errs = append(errs, &err)
+	}
+
+	if err := Join(errs...); err != nil {
+		*e = *err.(*Multi)
+		return nil
+	}
+
+	*e = Multi{}
 	return nil
 }

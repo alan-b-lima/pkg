@@ -72,8 +72,15 @@ func (err *Error) IsInternal() bool {
 // MarshalJSON implements the [json.Marshaler] interface on the type,
 // [Error.Cause] and [Error.Details] are ommited if nil.
 func (err Error) MarshalJSON() ([]byte, error) {
-	var efj errorForJSON
-	efj = errorForJSON(err)
+	type errorForJSON struct {
+		Kind    Kind           `json:"kind"`
+		Title   string         `json:"title"`
+		Message string         `json:"message"`
+		Cause   error          `json:"cause,omitempty"`
+		Details map[string]any `json:"details,omitempty"`
+	}
+
+	efj := errorForJSON(err)
 
 	if efj.Cause != nil {
 		efj.Cause = &wrapped{efj.Cause}
@@ -85,6 +92,14 @@ func (err Error) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the [json.Unmarshaler] interface on the type, might
 // fail if the cause cannot be unmarshalled into a sensible error type.
 func (err *Error) UnmarshalJSON(buf []byte) error {
+	type errorFromJSON struct {
+		Kind    Kind           `json:"kind"`
+		Title   string         `json:"title"`
+		Message string         `json:"message"`
+		Cause   wrapped        `json:"cause"`
+		Details map[string]any `json:"details"`
+	}
+
 	var efj errorFromJSON
 	if err := json.Unmarshal(buf, &efj); err != nil {
 		return err
@@ -98,20 +113,4 @@ func (err *Error) UnmarshalJSON(buf []byte) error {
 		Details: efj.Details,
 	}
 	return nil
-}
-
-type errorForJSON struct {
-	Kind    Kind           `json:"kind"`
-	Title   string         `json:"title"`
-	Message string         `json:"message"`
-	Cause   error          `json:"cause,omitempty"`
-	Details map[string]any `json:"details,omitempty"`
-}
-
-type errorFromJSON struct {
-	Kind    Kind           `json:"kind"`
-	Title   string         `json:"title"`
-	Message string         `json:"message"`
-	Cause   wrapped        `json:"cause"`
-	Details map[string]any `json:"details"`
 }
