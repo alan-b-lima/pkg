@@ -2,33 +2,35 @@ package problem
 
 import "fmt"
 
-type imp struct {
-	kind     Kind
-	title    string
-	message  string
-	cause    error
+// ImpError is an error implementation that can be incrementally constructed,
+// up until final construction, through [ImpError.Make], all [ImpError]s are
+// passed around as values, therefore, all previous [ImpError]s are oblivious
+// to future changes.
+type ImpError struct {
+	kind    Kind
+	title   string
+	message string
+	cause   error
 	details map[string]any
 }
 
-// Imp is an error implementation that can be incrementally constructed, up
-// until final construction, through [imp.Make], all [imp]s are passed around
-// as values, therefore, all previous [imp]s are oblivious to future changes.
-func Imp(kind Kind, title string) imp {
-	return imp{
+// Imp initiates a new error implementation.
+func Imp(kind Kind, title string) ImpError {
+	return ImpError{
 		kind:  kind,
 		title: title,
 	}
 }
 
 // Message replaces the error message of the implementation.
-func (b imp) Message(message string) imp {
+func (b ImpError) Message(message string) ImpError {
 	b.message = message
 	return b
 }
 
-// Message replaces the error message of the implementation.
-func (b imp) Format(format string) fmt_ {
-	return fmt_{
+// Format initiates a new error implementation formatter.
+func (b ImpError) Format(format string) FmtError {
+	return FmtError{
 		kind:    b.kind,
 		title:   b.title,
 		format:  format,
@@ -38,24 +40,42 @@ func (b imp) Format(format string) fmt_ {
 }
 
 // Cause replaces the error cause of the implementation.
-func (b imp) Cause(cause error) imp {
+func (b ImpError) Cause(cause error) ImpError {
 	b.cause = cause
 	return b
 }
 
 // Details replaces the error details of the implementation.
-func (b imp) Details(details map[string]any) imp {
+func (b ImpError) Details(details map[string]any) ImpError {
 	b.details = details
 	return b
 }
 
 // Make constructs a new error out of the current values in the fields of the
-// implementation. Every call to Make creates a different error.
-func (b imp) Make() error {
+// implementation.
+func (b ImpError) Make() error {
 	return New(b.kind, b.title, b.message, b.cause, b.details)
 }
 
-type fmt_ struct {
+// Is reports whether the given error is of the other type. See [Error.Is] for
+// its semantic meaning.
+//
+// Callers should prefer [errors.Is], as it handles deep comparisons.
+func (b ImpError) Is(other error) bool {
+	e := Error{Title: b.title}
+	return e.Is(other)
+}
+
+// Error implement the [error] interface. Callers might prefer [ImpError.Make]
+// to avoid possibly unnecessary allocations.
+func (b ImpError) Error() string {
+	return b.Make().Error()
+}
+
+// FmtError is an error implementation that can be incrementally constructed,
+// up until final construction, value semantics are [FmtError] the same as in
+// [ImpError].
+type FmtError struct {
 	kind    Kind
 	title   string
 	format  string
@@ -64,18 +84,35 @@ type fmt_ struct {
 }
 
 // Cause replaces the error cause of the implementation.
-func (gen fmt_) Cause(cause error) fmt_ {
+func (gen FmtError) Cause(cause error) FmtError {
 	gen.cause = cause
 	return gen
 }
 
 // Details replaces the error details of the implementation.
-func (gen fmt_) Details(details map[string]any) fmt_ {
+func (gen FmtError) Details(details map[string]any) FmtError {
 	gen.details = details
 	return gen
 }
 
-func (gen fmt_) Make(a ...any) error {
+// Make constructs a new error out of the current values in the fields of the
+// implementation.
+func (gen FmtError) Make(a ...any) error {
 	message := fmt.Errorf(gen.format, a...).Error()
 	return New(gen.kind, gen.title, message, gen.cause, gen.details)
+}
+
+// Is reports whether the given error is of the other type. See [Error.Is] for
+// its semantic meaning.
+//
+// Callers should prefer [errors.Is], as it handles deep comparisons.
+func (b FmtError) Is(other error) bool {
+	e := Error{Title: b.title}
+	return e.Is(other)
+}
+
+// Error implement the [error] interface. Callers might prefer [FmtError.Make]
+// to avoid possibly unnecessary allocations.
+func (gen FmtError) Error() string {
+	return gen.Make().Error()
 }

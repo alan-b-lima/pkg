@@ -63,7 +63,7 @@ func (e Multi) MarshalJSON() ([]byte, error) {
 		wrps = append(wrps, wrapped{err})
 	}
 
-	return json.Marshal(e.errs)
+	return json.Marshal(wrps)
 }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface on the type.

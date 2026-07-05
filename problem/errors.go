@@ -44,7 +44,7 @@ func (err *Error) Error() string {
 // Two errors are considered the same, i.e, they are each other, if they have
 // the same title.
 //
-// Callers should prefer [errors.Is], as it also handles deep comparisons.
+// Callers should prefer [errors.Is], as it handles deep comparisons.
 func (err *Error) Is(other error) bool {
 	if other, ok := other.(*Error); ok {
 		return err.Title == other.Title
