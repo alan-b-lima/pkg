@@ -18,8 +18,7 @@ type Error struct {
 	Details map[string]any
 }
 
-// New create a new error. Each new call generates a different error,
-// regardless of the parameters.
+// New create a new error.
 func New(kind Kind, title, message string, cause error, details map[string]any) error {
 	return &Error{
 		Kind:    kind,
@@ -41,14 +40,21 @@ func (err *Error) Error() string {
 
 // Is reports whether the given error is of the other type.
 //
-// Two errors are considered the same, i.e, they are each other, if they have
-// the same title.
+// Two errors are considered the same if, and only if, they share the same kind
+// and title. A error may only be an error of type [*Error], [*ImpError] or
+// [*FmtError].
 //
 // Callers should prefer [errors.Is], as it handles deep comparisons.
 func (err *Error) Is(other error) bool {
-	if other, ok := other.(*Error); ok {
-		return err.Title == other.Title
+	switch x := other.(type) {
+	case *Error:
+		return err.Kind == x.Kind && err.Title == x.Title
+	case *ImpError:
+		return err.Kind == x.kind && err.Title == x.title
+	case *FmtError:
+		return err.Kind == x.kind && err.Title == x.title
 	}
+
 	return false
 }
 
