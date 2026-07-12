@@ -64,18 +64,11 @@ func (b ImpError) Make() error {
 	return New(b.kind, b.title, b.message, b.cause, b.details)
 }
 
-// Is reports whether the given error is of the other type. See [Error.Is] for
-// its semantic meaning.
+// Error implement the [error] interface.
 //
-// Callers should prefer [errors.Is], as it handles deep comparisons.
-func (b ImpError) Is(other error) bool {
-	e := Error{Title: b.title}
-	return e.Is(other)
-}
-
-// Error implement the [error] interface. Callers might prefer [ImpError.Make]
-// to avoid possibly unnecessary allocations.
-func (b ImpError) Error() string {
+// This type implements the error interface to allow values to be used as
+// targets of [errors.Is].
+func (b *ImpError) Error() string {
 	return b.Make().Error()
 }
 
@@ -105,21 +98,14 @@ func (gen FmtError) Details(details map[string]any) FmtError {
 // Make constructs a new error out of the current values in the fields of the
 // implementation.
 func (gen FmtError) Make(a ...any) error {
-	message := fmt.Errorf(gen.format, a...).Error()
+	message := fmt.Sprintf(gen.format, a...)
 	return New(gen.kind, gen.title, message, gen.cause, gen.details)
 }
 
-// Is reports whether the given error is of the other type. See [Error.Is] for
-// its semantic meaning.
+// Error implement the [error] interface.
 //
-// Callers should prefer [errors.Is], as it handles deep comparisons.
-func (b FmtError) Is(other error) bool {
-	e := Error{Title: b.title}
-	return e.Is(other)
-}
-
-// Error implement the [error] interface. Callers might prefer [FmtError.Make]
-// to avoid possibly unnecessary allocations.
-func (gen FmtError) Error() string {
+// This type implements the error interface to allow values to be used as
+// targets of [errors.Is].
+func (gen *FmtError) Error() string {
 	return gen.Make().Error()
 }
