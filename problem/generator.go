@@ -28,7 +28,14 @@ func (b ImpError) Message(message string) ImpError {
 	return b
 }
 
-// Format initiates a new error implementation formatter.
+// Message replaces the error message with a formatted message.
+func (b ImpError) Messagef(format string, args ...any) ImpError {
+	b.message = fmt.Sprintf(format, args...)
+	return b
+}
+
+// Format initiates a new error implementation formatter with a predefined
+// format.
 func (b ImpError) Format(format string) FmtError {
 	return FmtError{
 		kind:    b.kind,
