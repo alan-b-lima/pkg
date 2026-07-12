@@ -52,9 +52,21 @@ func (b ImpError) Cause(cause error) ImpError {
 	return b
 }
 
-// Details replaces the error details of the implementation.
+// Details adds the error details of the implementation.
+//
+// Consider old as the details before a call to this function and new as the
+// details passed in. If a new's key is present in old, it will be replaced, in
+// case the value is non-nil, or deleted if the value is new. The other new
+// entries are inserted if non-nil.
+//
+// Although the use of “inserted”, “replaced” and “deleted”, detail maps are
+// never directly modified, new maps are allocated to account change if
+// necessary.
+//
+// Details takes ownership of the map object and it should not be modified
+// afterwards.
 func (b ImpError) Details(details map[string]any) ImpError {
-	b.details = details
+	b.details = combine(b.details, details)
 	return b
 }
 
@@ -90,8 +102,11 @@ func (gen FmtError) Cause(cause error) FmtError {
 }
 
 // Details replaces the error details of the implementation.
+//
+// See [ImpError.Details] for more information on how detail mapss are
+// combined.
 func (gen FmtError) Details(details map[string]any) FmtError {
-	gen.details = details
+	gen.details = combine(gen.details, details)
 	return gen
 }
 
@@ -108,4 +123,46 @@ func (gen FmtError) Make(a ...any) error {
 // targets of [errors.Is].
 func (gen *FmtError) Error() string {
 	return gen.Make().Error()
+}
+
+func combine(old, new map[string]any) map[string]any {
+	if new == nil {
+		return nil
+	}
+
+	if len(new) == 0 {
+		return old
+	}
+
+	var nils int
+	for _, v := range new {
+		if v == nil {
+			nils++
+		}
+	}
+
+	if len(old) == 0 {
+		switch nils {
+		case 0:
+			return new
+		case len(new):
+			return old
+		}
+	}
+
+	m := make(map[string]any, len(old)+len(new)-nils)
+
+	for s, v := range old {
+		if _, in := new[s]; !in {
+			m[s] = v
+		}
+	}
+
+	for s, v := range new {
+		if v != nil {
+			m[s] = v
+		}
+	}
+
+	return m
 }
