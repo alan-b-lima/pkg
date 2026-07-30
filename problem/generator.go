@@ -80,7 +80,7 @@ func (b ImpError) Make() error {
 //
 // This type implements the error interface to allow values to be used as
 // targets of [errors.Is].
-func (b *ImpError) Error() string {
+func (b ImpError) Error() string {
 	return b.Make().Error()
 }
 
@@ -121,7 +121,7 @@ func (gen FmtError) Make(a ...any) error {
 //
 // This type implements the error interface to allow values to be used as
 // targets of [errors.Is].
-func (gen *FmtError) Error() string {
+func (gen FmtError) Error() string {
 	return gen.Make().Error()
 }
 
